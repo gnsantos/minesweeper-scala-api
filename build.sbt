@@ -9,7 +9,9 @@ scalaVersion := "2.11.7"
 libraryDependencies ++= Seq(
   jdbc,
   cache,
+  guice,
   "org.postgresql" % "postgresql" % "9.4-1201-jdbc41",
+  "com.typesafe.play" %% "play" % "2.6",
   ws
 )
 
