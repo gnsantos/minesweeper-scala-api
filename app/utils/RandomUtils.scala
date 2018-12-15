@@ -19,5 +19,24 @@ object RandomUtils {
 
     row*cols + col
   }
-  
+
+  def insertBombs(numBombs: Int, rows: Int, cols: Int, cells: Seq[MinesweeperCell]): Seq[MinesweeperCell] = {
+    if(numBombs.equals(0)) {
+      return cells
+    }
+
+    val bombPosition = randomBoardPosition(rows, cols)
+    var placedBombs = 0
+
+    val newCells = cells.zipWithIndex.map {
+      case (cell, index) =>
+        if(index.equals(bombPosition) && cell.content.ne("B")){
+          placedBombs = 1
+          MinesweeperCell("B", false)
+        }
+        else cell
+    }
+
+    insertBombs(numBombs - placedBombs, rows, cols, newCells)
+  }
 }
