@@ -65,4 +65,15 @@ case class Board(id: UUID, cells: Seq[MinesweeperCell], rows: Int, cols: Int, bo
       case _ =>  this.copy(cells = newCells)
     }
   }
+
+  def revealBombs(): Board = {
+    val newCells = cells.map {
+      cell =>
+        cell.content match {
+          case "B" => MinesweeperCell(cell.content, seen = true)
+          case _ => cell
+        }
+    }
+    this.copy(cells = newCells, status = "lost")
+  }
 }

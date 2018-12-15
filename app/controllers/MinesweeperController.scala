@@ -32,8 +32,10 @@ class MinesweeperController @Inject()(cc: ControllerComponents, stateProvider: M
 
         val board: Board = stateProvider.getBoardState(boarId)
 
-        val newBoard = board.revealPosition(value.row, value.column)
-
+        val newBoard = board.cells(value.row*board.cols + value.column).content match {
+          case "B" => board.revealBombs()
+          case _ => board.revealPosition(value.row, value.column)
+        }
         stateProvider.updateBoardState(boarId, newBoard)
         Ok(Json.toJson(newBoard))
     }
