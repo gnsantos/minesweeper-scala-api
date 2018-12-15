@@ -25,4 +25,23 @@ object Board {
     ) (Board.apply _)
 }
 
-case class Board(id: UUID, cells: Seq[MinesweeperCell], rows: Int, cols: Int, bombs: Int, status: String)
+case class Board(id: UUID, cells: Seq[MinesweeperCell], rows: Int, cols: Int, bombs: Int, status: String) {
+  def neighborPositions(row: Int, col: Int): Seq[(Int, Int)] = {
+    var neighPositions = Seq.empty[(Int, Int)]
+    for(i <- -1 to 1) {
+      for(j <- -1 to 1) {
+        val pos = cols * (row + i) + (col + j)
+        if(!(i.equals(0) && j.equals(0)) && (((row + i) >= 0) && ((row + i) < rows)) && (((col + j) >= 0) && ((col + j) < cols)))
+          neighPositions ++= Seq((row + i,col + j))
+      }
+    }
+
+    neighPositions
+  }
+
+  def neighbors(row: Int, col: Int): Seq[MinesweeperCell] = {
+    neighborPositions(row, col).map {
+      case (i, j) => cells(i*cols + j)
+    }
+  }
+}
