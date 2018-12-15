@@ -39,4 +39,33 @@ object RandomUtils {
 
     insertBombs(numBombs - placedBombs, rows, cols, newCells)
   }
+
+  def randomBoard(): Board = {
+    val numRows = RandomUtils.intWithin(10, 20)
+    val numCols = RandomUtils.intWithin(10, 20)
+    val numBombs = RandomUtils.intWithin(20, 40)
+    val id = UUID.randomUUID()
+    val status = "ongoing"
+    val cells = (0 until numCols*numRows).map(_ => MinesweeperCell("0", false))
+
+    val cellsWithBombs = insertBombs(numBombs, numRows, numCols, cells)
+
+    val boardWithBombs = Board(id, cellsWithBombs, numRows, numCols, numBombs, status)
+
+    val hintValues = for(i <- 0 until numRows; j <- 0 until numCols) yield {
+      val neighbors = boardWithBombs.neighbors(i,j)
+      val bombsNear = neighbors.count(n => n.content.equals("B"))
+      bombsNear
+    }
+
+    val bombsAndHints = cellsWithBombs.zip(hintValues).map {
+      case (cell, hint) =>
+        cell.content match {
+          case "B" => cell
+          case _ => MinesweeperCell(hint.toString, false)
+        }
+    }
+
+    Board(id, bombsAndHints, numRows, numCols, numBombs, status)
+  }
 }
