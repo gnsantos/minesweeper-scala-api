@@ -44,4 +44,25 @@ case class Board(id: UUID, cells: Seq[MinesweeperCell], rows: Int, cols: Int, bo
       case (i, j) => cells(i*cols + j)
     }
   }
+
+  def revealPosition(row: Int, column: Int): Board = {
+    val clickedPosition: Int = cols*row + column
+
+    val newCells = cells.zipWithIndex.map {
+      case (cell, index) =>
+        if (index.equals(clickedPosition)) MinesweeperCell(cell.content, seen=true)
+      else cell
+    }
+
+    newCells(clickedPosition).content match {
+      case "0" =>
+        val neighborsAndPositions = neighbors(row, column).zip(neighborPositions(row, column))
+        neighborsAndPositions.filter {
+          case (cell, _) => !(cell.content == "B" || cell.seen)
+        }.foldLeft(this.copy(cells = newCells)) {
+          case (b, (_, (r,c))) => b.revealPosition(r, c)
+        }
+      case _ =>  this.copy(cells = newCells)
+    }
+  }
 }

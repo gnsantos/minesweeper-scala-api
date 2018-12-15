@@ -1,1 +1,2 @@
 GET     /start                       controllers.MinesweeperController.startBoard
+POST    /move                        controllers.MinesweeperController.move

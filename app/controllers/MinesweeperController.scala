@@ -1,6 +1,10 @@
 package controllers
 
+import java.util.UUID
+
 import javax.inject._
+import models.{Board, MinesweeperMovePostRequest, MinesweeperCell}
+
 import play.api.libs.json._
 import play.api.mvc._
 
@@ -15,6 +19,24 @@ class MinesweeperController @Inject()(cc: ControllerComponents, stateProvider: M
     val board = RandomUtils.randomBoard()
     stateProvider.createFirstBoarState(board)
     Ok(Json.toJson(board))
+  }
+
+  def move() = Action(parse.json) { implicit request: Request[JsValue] =>
+    val body = request.body
+    body.validate[MinesweeperMovePostRequest] match {
+      case JsError(errors) =>
+        val errorJson = JsObject(Seq("message" -> JsString("Invalid Request")))
+        BadRequest(errorJson)
+      case JsSuccess(value, _) =>
+        val boarId = value.boardId
+
+        val board: Board = stateProvider.getBoardState(boarId)
+
+        val newBoard = board.revealPosition(value.row, value.column)
+
+        stateProvider.updateBoardState(boarId, newBoard)
+        Ok(Json.toJson(newBoard))
+    }
   }
 
 }

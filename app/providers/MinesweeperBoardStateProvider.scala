@@ -26,4 +26,45 @@ class MinesweeperBoardStateProvider extends ConnectionProvider {
     conn.close()
   }
 
+  def getBoardState(id: UUID): Board  = {
+    val conn = createConnection()
+    val statement = conn.createStatement()
+    val state = statement.executeQuery(s"SELECT * FROM ${schema}.${table} WHERE id = '${id}';")
+    state.next()
+    val encodedBoard = state.getString("encoded_board").split("")
+    val currentBoard = state.getString("current_board").split("")
+
+    val cells = encodedBoard.zip(currentBoard).map {
+      case (content, displayed) =>
+        val seen = displayed match {
+          case "?" => false
+          case _ => true
+        }
+
+        MinesweeperCell(content, seen)
+    }
+
+    conn.close()
+
+    Board(id, cells, state.getInt("rows"), state.getInt("cols"),
+          state.getInt("bombs"), state.getString("game_status"))
+  }
+
+  def updateBoardState(id: UUID, newBoard: Board) = {
+    val conn = createConnection()
+    val statement = conn.createStatement()
+
+    val currentBoard = newBoard.cells.map {
+      cell => cell.seen match {
+        case true => cell.content
+        case false => "?"
+      }
+    }.mkString("")
+
+    val sql = s"UPDATE ${schema}.${table} SET current_board = '${currentBoard}' WHERE id = '${id}'; "
+
+    statement.execute(sql)
+    conn.close()
+  }
+
 }
